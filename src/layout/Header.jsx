@@ -20,30 +20,20 @@ function Header() {
                     return item
                 }
             })
-            let activetime = items[0].userActive.filter(item => {
-                if (item.date === days) {
-                    const prevtime = item.times;
-                    // item.times.push(...prevtime, time);
-                    console.log(item.times);
-                    return item.times
-                }
-            })
-            console.log(activetime);
-            const prev = activetime?.[0]?.times;
-            const newtime = activetime[0].times = [...prev, time];
 
-             activetime = items[0]?.userActive?.filter(item => {
+            let activetime = items[0].userActive.map(item => {
                 if (item.date === days) {
-                   item.times = newtime
+                    item.times = [...item.times, time]
                 }
-                return activetime
+                return item
             })
 
-            console.log(activetime);
             axios.patch(`http://localhost:8000/users/update/${id}`, {
                 userActive: activetime
             }).then((res) => {
                 console.log(res);
+                localStorage.clear()
+                navigate("/login")
             }).catch((err) => {
                 console.log('patch method is faild');
             })

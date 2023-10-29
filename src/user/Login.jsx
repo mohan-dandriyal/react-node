@@ -26,22 +26,36 @@ function Login() {
     axios.post("http://localhost:8000/users/login/", user).then((res) => {
       const id = res.data.user._id;
       let userActive = res.data.user.userActive;
+      console.log(userActive);
+
       let active = userActive.filter(items => {
         if (items?.date === days) {
           return items
         }
       })
-      const prevtime = active.length > 0 && active[0]?.times
+
+      userActive = userActive.map(items => {
+        if(items.date === days) {
+          items.times = [...items.times, time]
+        }
+        return items
+      })
+
+      // const prevtime = active.length > 0 && active[0]?.times
       const dates = active.length > 0 && active[0]?.date
 
-      dates === days ? userActive = [{ date: days, times: [...prevtime, time] }] : userActive.push({ date: days, times: [time] });
+      // dates === days ? userActive = [{ date: days, times: [...prevtime, time] }] : userActive.push({ date: days, times: [time] });
+
+       dates === days ? userActive = userActive : userActive.push({ date: days, times: [time] });
       
       axios.patch(`http://localhost:8000/users/update/${id}`, {
         userActive: userActive
       }).then((res) => {
+        console.log(res);
         navigate("/todo")
         localStorage.setItem("id", id)
-      }).catch((err) => {
+        console.log(res);
+      }).catch((err) => { 
         console.log('patch method is faild');
       })
     }).catch((err) => {
