@@ -10,8 +10,8 @@ import 'react-toastify/dist/ReactToastify.css';
 function Login() {
   const navigate = useNavigate()
   const [user, setUesr] = useState({
-    userEmail: null,
-    userPass: null
+    userEmail: 'rahul@gmail.com',
+    userPass: 'mohan@10'
   })
 
   const day = new Date()
@@ -19,45 +19,67 @@ function Login() {
 
   const hendleLogin = () => {
     const day = new Date()
-    const days = day.toLocaleDateString()
+    const date = 2 //day.getDate();
+    const month = day.getMonth() + 1;
+    const year = 2024
     const time = day.toLocaleTimeString()
 
 
     axios.post("http://localhost:8000/users/login/", user).then((res) => {
       const id = res.data.user._id;
       let userActive = res.data.user.userActive;
+
       console.log(userActive);
+      let active = userActive.map(items => {
+        console.log(items);
 
-      let active = userActive.filter(items => {
-        if (items?.date === days) {
-          return items
-        }
-      })
+        let yea = items.year;
+        let mon = items.year[1].month;
+        let dates = items.year[1].month[1].date
 
-      userActive = userActive.map(items => {
-        if(items.date === days) {
-          items.times = [...items.times, time]
-        }
+        if (items.year[0] === year) {
+          if (mon[0] === month) {
+            if (dates[0] === date) {
+              console.log('da', date);
+              dates[1].logintime.push(time);
+              console.log(items);
+            } else {
+              console.log('dat', date);
+              mon.push({ date: [date, { logintime: [time], logoutTime: [null] }] })
+            }
+          }
+          else {
+            yea.push({ month: [month, { date: [date, { logintime: [time], logoutTime: [null] }] }] })
+          }
+        } 
         return items
       })
 
-      // const prevtime = active.length > 0 && active[0]?.times
-      const dates = active.length > 0 && active[0]?.date
 
-      // dates === days ? userActive = [{ date: days, times: [...prevtime, time] }] : userActive.push({ date: days, times: [time] });
+      let years = userActive[0]?.year[0]
 
-       dates === days ? userActive = userActive : userActive.push({ date: days, times: [time] });
-      
+      active?.length > 0 ? userActive = active : userActive.push({
+        year: [year, {
+          month: [month, {
+            date: [date, {
+              logintime: [time],
+              logoutTime: [null]
+            }]
+          }]
+        }]
+      });
+
       axios.patch(`http://localhost:8000/users/update/${id}`, {
         userActive: userActive
       }).then((res) => {
         console.log(res);
-        navigate("/todo")
+        // navigate("/todo")
         localStorage.setItem("id", id)
         console.log(res);
-      }).catch((err) => { 
+      }).catch((err) => {
         console.log('patch method is faild');
       })
+
     }).catch((err) => {
       console.log(err);
     })
